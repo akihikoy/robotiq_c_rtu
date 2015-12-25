@@ -2,6 +2,9 @@
 
 # Copyright (c) 2015, Nihon Binary Co., Ltd.
 # All rights reserved.
+# 
+# Robotiq C Model (Modbus-RTU) Device management class
+# 
 
 import time
 import thread
@@ -167,5 +170,42 @@ class gripper:
 #com.sendCommand([1,0,255,0,100,0])
 #time.sleep(1);
 
+
+def main():
+	print ""
+	print "Robotiq Gripper C-Model(Modbus-RTU) Device Test"
+	print "Copyright (c) 2015 Nihon Binary Co., Ltd."
+	print ""
+
+	c = gripper()
+	c.openGripper("/dev/ttyUSB0")
+
+	c.setSpeed(0)
+	c.setPosition(255, True, False)
+	time.sleep(0.1)
+	c.setSpeed(25, True)
+	time.sleep(0.1)
+	c.setSpeed(50, True)
+	time.sleep(0.1)
+	c.setSpeed(75, True)
+	time.sleep(0.1)
+	c.setSpeed(100, True)
+	c.waitForBusy()
+
+	c.setPosition(0, True, False)
+	time.sleep(0.1)
+	c.setSpeed(75, True)
+	time.sleep(0.1)
+	c.setSpeed(50, True)
+	time.sleep(0.1)
+	c.setSpeed(25, True)
+	time.sleep(0.1)
+	c.setSpeed(0, True)
+	c.waitForBusy()
+
+if __name__ == '__main__':
+	main()
+			
+			
 
 

@@ -3,6 +3,8 @@
 # Copyright (c) 2015, Nihon Binary Co., Ltd.
 # All rights reserved.
 # 
+# Robotiq C Model (Modbus-RTU) ROS Driver Node
+# 
 # Command Line Parameter:
 #	rosrun robotiq_c_rtu robotiq_c_rtu_node.py [device_name] [port]
 # 
