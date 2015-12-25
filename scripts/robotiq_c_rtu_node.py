@@ -15,14 +15,14 @@
 # Subscribe topic: 
 #	/robotiq/device_name/command/position
 # 	/robotiq/device_name/command/speed
-# 	/device_name/command/force
+# 	/robotiq/device_name/command/force
 # 
 # Publish topic:
-#	/device_name/current/position
-# 	/device_name/current/current
-# 	/device_name/current/fault
-# 	/device_name/current/busy
-# 	/device_name/current/object
+#	/robotiq/device_name/current/position
+# 	/robotiq/device_name/current/current
+# 	/robotiq/device_name/current/fault
+# 	/robotiq/device_name/current/busy
+# 	/robotiq/device_name/current/object
 # 
 
 # python library
