@@ -6,6 +6,7 @@
 # Robotiq C Model (Modbus-RTU) Device management class
 # 
 
+import sys
 import time
 import thread
 import comModbusRtu
@@ -176,32 +177,43 @@ def main():
 	print "Robotiq Gripper C-Model(Modbus-RTU) Device Test"
 	print "Copyright (c) 2015 Nihon Binary Co., Ltd."
 	print ""
+	print "Usage: " + sys.argv[0] + " [port]"
+	print ""
+	print "Default value:"
+	print "\tport=/dev/ttyUSB0"
+	print ""
+
+	port = "/dev/ttyUSB0"
+	if len(sys.argv) >= 2:
+		port = sys.argv[1]
 
 	c = gripper()
-	c.openGripper("/dev/ttyUSB0")
+	if c.openGripper(port):
 
-	c.setSpeed(0)
-	c.setPosition(255, True, False)
-	time.sleep(0.1)
-	c.setSpeed(25, True)
-	time.sleep(0.1)
-	c.setSpeed(50, True)
-	time.sleep(0.1)
-	c.setSpeed(75, True)
-	time.sleep(0.1)
-	c.setSpeed(100, True)
-	c.waitForBusy()
+		c.setSpeed(0)
+		c.setPosition(255, True, False)
+		time.sleep(0.1)
+		c.setSpeed(25, True)
+		time.sleep(0.1)
+		c.setSpeed(50, True)
+		time.sleep(0.1)
+		c.setSpeed(75, True)
+		time.sleep(0.1)
+		c.setSpeed(100, True)
+		c.waitForBusy()
 
-	c.setPosition(0, True, False)
-	time.sleep(0.1)
-	c.setSpeed(75, True)
-	time.sleep(0.1)
-	c.setSpeed(50, True)
-	time.sleep(0.1)
-	c.setSpeed(25, True)
-	time.sleep(0.1)
-	c.setSpeed(0, True)
-	c.waitForBusy()
+		c.setPosition(0, True, False)
+		time.sleep(0.1)
+		c.setSpeed(75, True)
+		time.sleep(0.1)
+		c.setSpeed(50, True)
+		time.sleep(0.1)
+		c.setSpeed(25, True)
+		time.sleep(0.1)
+		c.setSpeed(0, True)
+		c.waitForBusy()
+	else:
+		print "Failed to open Gripper: "+port
 
 if __name__ == '__main__':
 	main()
