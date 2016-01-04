@@ -33,10 +33,15 @@ Name of the device which used as toppic's namespace which subscribed/published b
 *serial_port*  
 Path to the device file of the serial port which connected to the gripper. Default value of serial_port is "/dev/ttyUSB0".
 
-## Test Robotiq Gripper Device:
+### Control gripper by topics:
+$ rostopic pub -1 /robotiq/*device_name*/command/speed std_msgs/Int32 -- 0  
+$ rostopic pub -1 /robotiq/*device_name*/command/force std_msgs/Int32 -- 0  
+$ rostopic pub -1 /robotiq/*device_name*/command/position std_msgs/Int32 -- 255  
+
+## Test Robotiq Gripper:
 $ robotiq_c_rtu_device.py [serial_port]
 
-* ROS node for Robotiq Gripper must be exited before running this test program.
+* The ROS node must be exited before running this test program.
 
 Parameters: 
 
