@@ -23,15 +23,18 @@ $ exit
 ## How to use this package
 
 ### Run robotiq_c_rtu_node ROS Node:  
-$ rosrun robotiq_c_rtu robotiq_c_rtu_node.py [device_name] [serial_port]  
+$ rosrun robotiq_c_rtu robotiq_c_rtu_node.py [device_name] [serial_port] [rate]
 
 Parameters: 
 
-*device_name*  
+*device_name*
 Name of the device which used as toppic's namespace which subscribed/published by this node. Each instance of this node for each grippers must have identical name. Default value of device_name is "gripper".
 
-*serial_port*  
+*serial_port*
 Path to the device file of the serial port which connected to the gripper. Default value of serial_port is "/dev/ttyUSB0".
+
+*rate*
+Control rate in Hz.  Default value is 10.0 Hz.
 
 ### Control gripper by topics:
 $ rostopic pub -1 /robotiq/*device_name*/command/speed std_msgs/Int32 -- 0  
