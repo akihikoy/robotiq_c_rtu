@@ -40,13 +40,15 @@ import robotiq_c_rtu_device
 # parameter
 port = "/dev/ttyUSB0"
 device_name = "gripper"
+rate = 10.0
 
 def initGripper():
 	global gripper
 	global port
+	global rate
 	print "Initializing Gripper..."
 	gripper = robotiq_c_rtu_device.gripper()
-	return gripper.openGripper(port)
+	return gripper.openGripper(port, rate)
 	
 def releaseGripper():
 	global gripper
@@ -56,9 +58,12 @@ def releaseGripper():
 
 def positionCallback(data):
 	global gripper
-	#print "command position: ", data.data
 	#print "position thread: ", thread.get_ident()
-	gripper.setPosition(data.data, True, False)
+	#print 'command position',data.data
+	tm0= time.time()
+	#gripper.setPosition(data.data, True, False)
+	gripper.setPosition(data.data, False, False)
+	#print 'debug22',time.time()-tm0
 	#print "---"
 	
 def speedCallback(data):
@@ -84,8 +89,9 @@ def setupSubscriber():
 	rospy.Subscriber("/robotiq/"+device_name+"/command/force", Int32, forceCallback)
 	#rospy.spin()
 
-def startPbulish(rate):
+def startPbulish():
 	global gripper
+	global rate
 	print "Start publishing."
 	
 	print "Publish topic: /robotiq/"+device_name+"/current/position"
@@ -101,26 +107,30 @@ def startPbulish(rate):
 	rate_adjuster = rospy.Rate(rate)
 	
 	while not rospy.is_shutdown():
-		#print "start publish"
+		tm0 = rospy.Time.now()
+		#print "start publish", tm0
 		#print "main thread: ", thread.get_ident()
 		data = gripper.getInputData()
-		#print "position ", data[robotiq_c_rtu_device.IN_POSITION]
-		pub_position.publish(data[robotiq_c_rtu_device.IN_POSITION])
-		#print "current ", data[robotiq_c_rtu_device.IN_CURRENT]
-		pub_current.publish(data[robotiq_c_rtu_device.IN_CURRENT])
-		#print "fault ", data[robotiq_c_rtu_device.IN_FAULT]
-		pub_fault.publish(data[robotiq_c_rtu_device.IN_FAULT])
-		busy = not (data[robotiq_c_rtu_device.IN_STATUS] & robotiq_c_rtu_device.STATUS_BUSY_MASK) \
-				or not (data[robotiq_c_rtu_device.IN_STATUS] & robotiq_c_rtu_device.STATUS_OBJECT_MASK == robotiq_c_rtu_device.STATUS_OBJECT_INMOTION)
-				#print "busy ", busy
-		pub_busy.publish(busy)
-		pub_object.publish((data[robotiq_c_rtu_device.IN_STATUS] & robotiq_c_rtu_device.STATUS_OBJECT_MASK) >> 6)
+		if len(data)>0:
+		  #tm1 = rospy.Time.now(); print (tm1-tm0).to_sec(); tm0 = tm1
+		  #print "position ", data[robotiq_c_rtu_device.IN_POSITION]
+		  pub_position.publish(data[robotiq_c_rtu_device.IN_POSITION])
+		  #  print "current ", data[robotiq_c_rtu_device.IN_CURRENT]
+		  pub_current.publish(data[robotiq_c_rtu_device.IN_CURRENT])
+		  #print "fault ", data[robotiq_c_rtu_device.IN_FAULT]
+		  pub_fault.publish(data[robotiq_c_rtu_device.IN_FAULT])
+		  busy = not (data[robotiq_c_rtu_device.IN_STATUS] & robotiq_c_rtu_device.STATUS_BUSY_MASK) \
+		  		or not (data[robotiq_c_rtu_device.IN_STATUS] & robotiq_c_rtu_device.STATUS_OBJECT_MASK == robotiq_c_rtu_device.STATUS_OBJECT_INMOTION)
+		  		#print "busy ", busy
+		  pub_busy.publish(busy)
+		  pub_object.publish((data[robotiq_c_rtu_device.IN_STATUS] & robotiq_c_rtu_device.STATUS_OBJECT_MASK) >> 6)
 		#print "end publish"
+		gripper.sendOutputCommand(sync=False)
 		rate_adjuster.sleep()
 
 
 def main():
-	global device_name, port
+	global device_name, port, rate
 	print ""
 	print "Robotiq Gripper C-Model(Modbus-RTU) ROS Interface Node"
 	print "Copyright (c) 2015 Nihon Binary Co., Ltd."
@@ -136,7 +146,7 @@ def main():
 		device_name = sys.argv[1]
 	if len(sys.argv) >= 3:
 		port = sys.argv[2]
-	rate = sys.argv[3] if len(sys.argv)>3 else 10.0
+	if len(sys.argv)>3:  rate = float(sys.argv[3])
 
 	print ""
 	print "Current Parameters: "
@@ -149,7 +159,7 @@ def main():
 		try:
 			rospy.init_node('robotiq_c_rtu', anonymous=True)
 			setupSubscriber()
-			startPbulish(rate)
+			startPbulish()
 		except rospy.ROSInterruptException:
 			pass
 			

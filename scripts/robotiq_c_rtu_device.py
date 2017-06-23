@@ -57,10 +57,12 @@ class gripper:
 		self.com = None
 		self._lock = thread.allocate_lock()
 	
-	def openGripper(self, port):
+	def openGripper(self, port, rate):
+		global CMD_SLEEP_TIME
+		CMD_SLEEP_TIME = 1.0/rate
 		if self.com == None:
 			self.com = comModbusRtu.communication()
-			if self.com.connectToDevice(port):
+			if self.com.connectToDevice(port, timeout=1.0/rate):
 				# successfully connected
 				print "Gripper opened at port " + port
 				self._initGripper()	
@@ -102,6 +104,7 @@ class gripper:
 	def _waitForActivation(self):
 		while True:
 			self._in = self.getInputData()
+			if len(self._in)==0:  break
 			#print "Input:", self._in
 			#print "STATUS_GSTAT_ACTIVATIONISCOMPLETED", STATUS_GSTAT_ACTIVATIONISCOMPLETED
 			#print "self._in[IN_STATUS] & STATUS_OBJECT_MASK", self._in[IN_STATUS] & STATUS_OBJECT_MASK
@@ -112,6 +115,7 @@ class gripper:
 	def waitForBusy(self):
 		while True:
 			self._in = self.getInputData()
+			if len(self._in)==0:  break
 			#print "Input:", self._in
 			#print "self._in[IN_STATUS] & STATUS_BUSY_MASK", self._in[IN_STATUS] & STATUS_BUSY_MASK
 			#print "self._in[IN_STATUS] & STATUS_GSTAT_MASK", self._in[IN_STATUS] & STATUS_GSTAT_MASK
@@ -128,7 +132,9 @@ class gripper:
 	
 	def getInputData(self):
 		self._lock.acquire()
+		#tm0= time.time()
 		data = self.com.getStatus(IN_SIZE);
+		#print 'debug',time.time()-tm0
 		self._lock.release()
 		return data
 

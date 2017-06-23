@@ -44,16 +44,19 @@ The module depends on pymodbus (http://code.google.com/p/pymodbus/) for the Modb
 """
 
 from pymodbus.client.sync import ModbusSerialClient
+from pymodbus.register_read_message import ReadHoldingRegistersResponse
 from math import ceil
+import time
 
 class communication:	
 
    def __init__(self):
       self.client = None
       
-   def connectToDevice(self, device):
+   def connectToDevice(self, device, timeout=0.2):
       """Connection to the client - the method takes the IP address (as a string, e.g. '192.168.1.11') as an argument."""
-      self.client = ModbusSerialClient(method='rtu',port=device,stopbits=1, bytesize=8, baudrate=115200, timeout=0.2)
+      print 'connectToDevice: timeout=',timeout
+      self.client = ModbusSerialClient(method='rtu',port=device,stopbits=1, bytesize=8, baudrate=115200, timeout=timeout)
       if not self.client.connect():
           print "Unable to connect to %s" % device
           return False
@@ -85,10 +88,14 @@ class communication:
 
       #To do!: Implement try/except 
       #Get status from the device
+      #tm0= time.time()
       response = self.client.read_holding_registers(0x07D0, numRegs, unit=0x0009)
+      #print 'debug12',time.time()-tm0
 
       #Instantiate output as an empty list
       output = []
+      if response is None:  return output
+      if not isinstance(response, ReadHoldingRegistersResponse):  return output
 
       #Fill the output with the bytes in the appropriate order
       for i in range(0, numRegs):
