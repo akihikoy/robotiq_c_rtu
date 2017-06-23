@@ -84,7 +84,7 @@ def setupSubscriber():
 	rospy.Subscriber("/robotiq/"+device_name+"/command/force", Int32, forceCallback)
 	#rospy.spin()
 
-def startPbulish():
+def startPbulish(rate):
 	global gripper
 	print "Start publishing."
 	
@@ -98,7 +98,7 @@ def startPbulish():
 	pub_busy = rospy.Publisher("/robotiq/"+device_name+"/current/busy", Bool, queue_size=10)
 	print "Publish topic: /robotiq/"+device_name+"/current/object"
 	pub_object = rospy.Publisher("/robotiq/"+device_name+"/current/object", Int32, queue_size=10)
-	rate = rospy.Rate(10)
+	rate_adjuster = rospy.Rate(rate)
 	
 	while not rospy.is_shutdown():
 		#print "start publish"
@@ -116,7 +116,7 @@ def startPbulish():
 		pub_busy.publish(busy)
 		pub_object.publish((data[robotiq_c_rtu_device.IN_STATUS] & robotiq_c_rtu_device.STATUS_OBJECT_MASK) >> 6)
 		#print "end publish"
-		rate.sleep()	
+		rate_adjuster.sleep()
 
 
 def main():
@@ -125,28 +125,31 @@ def main():
 	print "Robotiq Gripper C-Model(Modbus-RTU) ROS Interface Node"
 	print "Copyright (c) 2015 Nihon Binary Co., Ltd."
 	print ""
-	print "Usage: " + sys.argv[0] + " [device_name] [port]"
+	print "Usage: " + sys.argv[0] + " [device_name] [port] [rate]"
 	print "\tDefault values are:"
 	print "\t\tdevice_name=gripper"
 	print "\t\tport=/dev/ttyUSB0"
+	print "\t\rate=10.0"
 	print ""
 
 	if len(sys.argv) >= 2:
 		device_name = sys.argv[1]
 	if len(sys.argv) >= 3:
 		port = sys.argv[2]
+	rate = sys.argv[3] if len(sys.argv)>3 else 10.0
 
 	print ""
 	print "Current Parameters: "
 	print "\tDevice Name: ", device_name
 	print "\tPort: ", port
+	print "\tRate: ", rate
 	print ""
 	
 	if initGripper():
 		try:
 			rospy.init_node('robotiq_c_rtu', anonymous=True)
 			setupSubscriber()
-			startPbulish()
+			startPbulish(rate)
 		except rospy.ROSInterruptException:
 			pass
 			
